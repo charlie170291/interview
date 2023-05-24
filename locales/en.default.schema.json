@@ -1,0 +1,12 @@
+{
+  "settings_schema": {
+    "global": {
+      "hello": "Hello"
+    }
+  },
+  "sections": {
+    "all":{
+      "hello": "Hello"
+    }
+  }
+}
