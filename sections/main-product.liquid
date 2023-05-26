@@ -1,0 +1,256 @@
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+{%- assign product_form_id = 'product-form-' | append: section.id -%}
+{%- assign current_options = current_variant.option1
+  | append: ','
+  | append: current_variant.option2
+  | append: ','
+  | append: current_variant.option3
+  | split: ','
+-%}
+{%- assign has_option_gallery = false -%}
+{%- if product.metafields.custom.option_name != blank -%}
+  {%- assign has_option_gallery = true -%}
+  {%- assign color_index = -1 -%}
+  {%- if product.options contains product.metafields.custom.option_name -%}
+    {%- for option in product.options -%}
+      {%- if option == product.metafields.custom.option_name -%}
+        {%- assign color_index = forloop.index0 -%}
+      {%- endif -%}
+    {%- endfor -%}
+  {%- endif -%}
+  {%- if color_index > -1 -%}
+    {%- assign selected_color = current_variant.options[color_index] -%}
+  {%- endif -%}
+{%- endif -%}
+<section id="mainProductHtml" class="prodSec">
+  <div class="container">
+    <div class="prodDetails">
+      <div class="pdLeft">
+        {%- include 'product-media' -%}
+      </div>
+      {%- form 'product', product, id: 'product-form', class: 'pdRight' -%}
+        <div class="pdTitle">
+          <div id="priceHtml" class="purchase">
+            {%- if current_variant.compare_at_price and current_variant.compare_at_price > current_variant.price -%}
+              <span class="specific-price-compare">{{ current_variant.compare_at_price | money }}</span>
+            {%- endif -%}
+            <span class="specific-price">{{ current_variant.price | money }}</span>
+          </div>
+          <h2>{{ product.title | escape }}</h2>
+          <span
+            id="stockHtml"
+            class="stockText {% unless current_variant.available %}outofstock{%- endunless -%}"
+          >
+            {%- if current_variant.available -%}Instock{%- else -%}Out of stock{%- endif -%}
+          </span>
+        </div>
+        <select name="id" id="variantHtml" style="display:none;">
+          {%- for variant in product.variants -%}
+            {%- if selected_color != blank -%}
+              {% assign variant_images = variant.featured_media | default: product.featured_image | img_url: '768x' %}
+              {% for media in product.media %}
+                {% assign image = media.preview_image %}
+                {% assign alt_text = image.alt | escape %}
+                {% if alt_text == variant.options[color_index] %}
+                  {% assign img_src = image | img_url: '768x' %}
+                  {% if img_src != variant_images %}
+                    {% assign variant_images = variant_images | append: ',' | append: img_src %}
+                  {% endif %}
+                {% endif %}
+              {% endfor %}
+            {%- endif -%}
+            <option
+              {% if variant.id == current_variant.id %}
+                selected="selected"
+              {% endif %}
+              value="{{ variant.id }}"
+              data-title="{{ variant.title }}"
+              data-option1="{{ variant.option1 }}"
+              data-option2="{{ variant.option2 }}"
+              data-option3="{{ variant.option3 }}"
+              data-price="{{ variant.price }}"
+              data-image="{{ variant.featured_media.id  | default: product.featured_image.id }}"
+              data-media="{{ variant_images }}"
+              data-compare-price="{{ variant.compare_at_price }}"
+              data-availability="{{ variant.available }}"
+            >
+              {{ variant.title }}
+            </option>
+          {%- endfor -%}
+        </select>
+        {%- for option in product.options_with_values -%}
+          {%- assign opt_handle = option.name | handleize -%}
+          {%- assign opt_index = forloop.index0 -%}
+          {%- assign opt_name = forloop.index -%}
+          <div
+            class="variant_option_container {%if opt_handle != 'color' %}material{% else %}color{%- endif -%}"
+            {% if product.has_only_default_variant %}
+              style="display:none"
+            {% endif %}
+          >
+            <span class="sizeText">
+              {{ option.name }}: <span data-option="option{{ opt_name }}">{{ current_options[opt_index] }}</span>
+            </span>
+            {%- if opt_handle != 'color' -%}
+              <div class="material-swatches">
+                {%- for value in option.values -%}
+                  <div class="swatch-element variant_option_wrapper">
+                    <input
+                      type="radio"
+                      {% if value == current_options[opt_index] %}
+                        checked="checked"
+                      {% endif %}
+                      name="option{{ opt_name }}"
+                      id="{{ value | handleize }}"
+                      class="variant_option"
+                      value="{{ value }}"
+                    >
+                    <label for="{{ value | handleize }}">{{ value }}</label>
+                  </div>
+                {%- endfor -%}
+              </div>
+            {%- else -%}
+              <div class="colorOption">
+                <ul>
+                  {%- for value in option.values -%}
+                    {%- capture style -%}
+                      {%- for block in section.blocks -%}
+                        {%- if block.type == 'color_picker' -%}
+                          {%- if block.settings.color_name == value -%}style="background-color:{{ block.settings.hex_code }} !important"{%- endif -%}
+                        {%- endif -%}
+                      {%- endfor -%}
+                      {%- endcapture -%}
+                    <li class="{{ value | handleize }} color-swatch variant_option_wrapper">
+                      <input
+                        {% if value == current_options[opt_index] %}
+                          checked="checked"
+                        {% endif %}
+                        type="radio"
+                        name="option{{ opt_name }}"
+                        id="{{ value | handleize }}"
+                        value="{{ value }}"
+                        class="variant_option"
+                      >
+                      <label title="{{ value }}" for="{{ value | handleize }}" {{ style }}></label>
+                    </li>
+                  {%- endfor -%}
+                </ul>
+              </div>
+            {%- endif -%}
+          </div>
+        {%- endfor -%}
+        <div class="add-to-cart-wrapper">
+          <input
+            id="quantity"
+            type="number"
+            name="quantity"
+            value="1"
+            min="1"
+            class="quantity"
+          >
+          <button
+            type="submit"
+            id="addBtn"
+            class="acBtn {% unless current_variant.available %}sold{% endunless %}"
+          >
+            {%- if current_variant.available -%}Add to cart{%- else -%}Out of stock{%- endif -%}
+          </button>
+          <div id="errorMessage" class="errorMessage"></div>
+        </div>
+      {%- endform -%}
+    </div>
+    <div class="prodInfo">
+      {%- if product.description != blank -%}
+        <div class="accMain topArrow">Description</div>
+        <div class="accDiv" style="display: block;">
+          {{ product.description }}
+        </div>
+      {%- endif -%}
+
+      {% if product.metafields.custom.accordion_1_heading != blank
+        and product.metafields.custom.accordion_1_content != blank
+      %}
+        <div class="accMain">{{ product.metafields.custom.accordion_1_heading }}</div>
+        <div class="accDiv">
+          {{ product.metafields.custom.accordion_1_content }}
+        </div>
+      {% else %}
+        <div class="accMain">{{ section.settings.accordion_1_heading }}</div>
+        <div class="accDiv">
+          {{ section.settings.accordion_1_content }}
+        </div>
+      {% endif %}
+
+      {% if product.metafields.custom.accordion_2_heading != blank
+        and product.metafields.custom.accordion_2_content != blank
+      %}
+        <div class="accMain">{{ product.metafields.custom.accordion_2_heading }}</div>
+        <div class="accDiv">
+          {{ product.metafields.custom.accordion_2_content }}
+        </div>
+      {% else %}
+        <div class="accMain">{{ section.settings.accordion_2_heading }}</div>
+        <div class="accDiv">
+          {{ section.settings.accordion_2_content }}
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% schema %}
+{
+  "name": "Product Page",
+  "settings": [
+    {
+      "type": "color",
+      "id": "color",
+      "label": "Color",
+      "default": "#000000"
+    },
+    {
+      "type": "text",
+      "id": "accordion_1_heading",
+      "label": "Accordion 1 Heading",
+      "default": "Polices"
+    },
+    {
+      "type": "textarea",
+      "id": "accordion_1_content",
+      "label": "Accordion 1 Content",
+      "default": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    },
+    {
+      "type": "text",
+      "id": "accordion_2_heading",
+      "label": "Accordion 2 Heading",
+      "default": "Policies"
+    },
+    {
+      "type": "textarea",
+      "id": "accordion_2_content",
+      "label": "Accordion 2 Content",
+      "default": "Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book."
+    }
+  ],
+  "blocks": [
+    {
+      "type": "color_picker",
+      "name": "Color Swatch",
+      "settings": [
+        {
+          "type": "text",
+          "id": "color_name",
+          "label": "Color Name",
+          "default": "Red"
+        },
+        {
+          "type": "text",
+          "id": "hex_code",
+          "label": "Hex Code",
+          "default": "#FF0000"
+        }
+      ]
+    }
+  ]
+}
+{% endschema %}

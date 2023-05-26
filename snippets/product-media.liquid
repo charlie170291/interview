@@ -1,0 +1,44 @@
+<div id="slider" class="flexslider">
+  <ul class="slides">
+    {%- for media in product.media -%}
+      {%- assign image = media.preview_image | default: product.featured_image -%}
+      {%- assign alt_text = image.alt | escape -%}
+      {%- if alt_text == selected_color or selected_color == blank -%}
+        <li data-image="{{ media.id }}">
+          <div class="imae_wrapper"  style="position:relative;padding-bottom:100%;overflow:hidden;">
+          <img
+            src="{{ image | img_url: '768x' }}"
+            srcset="
+              {{ image | img_url: '768x' }} 768w,
+              {{ image | img_url: '480x' }} 480w
+            "
+            sizes="
+              (max-width: 768px) 50vw,
+              (max-width: 480px) 100vw,
+              25vw
+            "
+            alt="{{ alt_text }}"
+            style="position:absolute;top:0px;left:50%;width:auto;height:100%;transform:translateX(-50%)"
+          >
+          </div>
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>
+<div id="carousel" class="flexslider">
+  <ul class="slides">
+    {%- for media in product.media -%}
+      {%- assign image = media.preview_image | default: product.featured_image -%}
+      {%- assign alt_text = image.alt | escape -%}
+      {%- if alt_text == selected_color or selected_color == blank -%}
+        <li data-image="{{ media.id }}">
+          <img
+            src="{{ image | img_url: '150x' }}"
+            alt="{{ image.alt | escape }}"
+          >
+        </li>
+      {%- endif -%}
+    {%- endfor -%}
+  </ul>
+</div>

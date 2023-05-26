@@ -1,0 +1,14 @@
+<section id="mainCollectionHtml" class="prodSec">
+  <div class="container">
+    <div class="collection-page">
+      <div class="title-bar">
+        <h1>{{ collection.title }}</h1>
+      </div>
+      {% if collection.description != blank %}
+        <div class="description">
+          <p>{{ collection.description }}</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>

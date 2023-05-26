@@ -1,0 +1,83 @@
+<div class="headTop posStatic">
+  {%- if section.settings.announcement != blank -%}
+    <div class="topTip">
+      <p>{{ section.settings.announcement }}</p>
+    </div>
+  {%- endif -%}
+  <header class="headDark whiteBG">
+    <div class="container">
+      <div class="headInner">
+        <a href="javascript:;" rel="nofollow" class="menuIcon">
+          <span class="line1"></span>
+          <span class="line2"></span>
+          <span class="line3"></span>
+        </a>
+        {%- if section.settings.menu_items != blank -%}
+          <ul class="menu">
+            {%- for item in linklists[section.settings.menu_items].links -%}
+              <li>
+                <a href="{{ item.url }}">{{ item.title }}</a>
+              </li>
+            {%- endfor -%}
+          </ul>
+        {%- endif -%}
+        {%- if section.settings.logo_image != blank -%}
+          <div class="logo">
+            <a href="/"
+              ><img src="{{ section.settings.logo_image | img_url }}" alt="{{ section.settings.logo_text }}"
+            ></a>
+          </div>
+        {%- elsif section.settings.logo_text != blank -%}
+          <div class="logo">
+            <a href="/">{{ section.settings.logo_text }}</a>
+          </div>
+        {%- endif -%}
+        <div class="headRight">
+          <ul>
+            <li>
+              <a href="/cart" id="cart_icon" class="{% if cart.item_count > 0 %}has_items{% endif%} cart_icon">
+                <img src="{{ 'bag.svg' | asset_url }}" alt="">
+                <span>
+                  {%- if cart.item_count > 0 -%}{{ cart.item_count }}{%- endif -%}
+                </span>
+              </a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </header>
+</div>
+{%- schema -%}
+{
+  "name": "Header",
+  "settings": [
+    {
+      "type": "text",
+      "label": "Announcement",
+      "id": "announcement",
+      "default": "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      "info": "Enter the text for the Announcement bar"
+    },
+    {
+      "type": "link_list",
+      "label": "Menu Items",
+      "id": "menu_items",
+      "info": "Add menu items for the navigation menu"
+    },
+    {
+      "type": "text",
+      "label": "Logo Text",
+      "id": "logo_text",
+      "default": "BRAND LOGO",
+      "info": "Enter the text for the logo"
+    },
+    {
+      "type": "image_picker",
+      "label": "Logo Image",
+      "id": "logo_image",
+      "info": "Select an image for the logo"
+    }
+  ]
+}
+{%- endschema -%}

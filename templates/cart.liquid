@@ -1,0 +1,176 @@
+{% layout none %}
+
+{% capture form_id %}cart-form-{{ section.id }}{% endcapture %}
+
+<style>
+  /* CSS styles for the cart page */
+  .cart-wrapper {
+    /* Add your styles here */
+  }
+
+  .cart-heading {
+    /* Add your styles here */
+  }
+
+  .cart-items {
+    /* Add your styles here */
+  }
+
+  .cart-item {
+    /* Add your styles here */
+  }
+
+  .cart-item__image {
+    /* Add your styles here */
+  }
+
+  .cart-item__info {
+    /* Add your styles here */
+  }
+
+  .cart-item__title {
+    /* Add your styles here */
+  }
+
+  .cart-item__variant {
+    /* Add your styles here */
+  }
+
+  .cart-item__price {
+    /* Add your styles here */
+  }
+
+  .cart-item__quantity {
+    /* Add your styles here */
+  }
+
+  .cart-item__quantity-input {
+    /* Add your styles here */
+  }
+
+  .cart-item__remove {
+    /* Add your styles here */
+  }
+
+  .cart-footer {
+    /* Add your styles here */
+  }
+
+  .cart-footer__subtotal {
+    /* Add your styles here */
+  }
+
+  .cart-footer__subtotal-price {
+    /* Add your styles here */
+  }
+
+  .cart-footer__note {
+    /* Add your styles here */
+  }
+
+  .cart-footer__note-input {
+    /* Add your styles here */
+  }
+
+  .cart-footer__update {
+    /* Add your styles here */
+  }
+
+  .cart-footer__checkout {
+    /* Add your styles here */
+  }
+
+  .empty-cart-message {
+    /* Add your styles here */
+  }
+
+  .empty-cart-link {
+    /* Add your styles here */
+  }
+</style>
+
+<form action="/cart" method="post" novalidate id="{{ form_id }}" class="cart-form">
+  <div class="cart-wrapper">
+    <div class="cart-heading">
+      <h1 class="cart-heading__title">Your Cart</h1>
+      <a href="/" class="cart-heading__continue">Continue Shopping</a>
+    </div>
+
+    {% if cart.item_count > 0 %}
+      <div class="cart-items">
+        {% for item in cart.items %}
+          <div class="cart-item">
+            <div class="cart-item__image">
+              {% if item.image %}
+                <img src="{{ item.image | img_url: 'thumb' }}" alt="{{ item.title }}">
+              {% else %}
+                <div class="placeholder-image"></div>
+              {% endif %}
+            </div>
+            <div class="cart-item__info">
+              <h2 class="cart-item__title">{{ item.title }}</h2>
+              <p class="cart-item__variant">{{ item.variant_title }}</p>
+              <p class="cart-item__price">{{ item.price | money }}</p>
+              <div class="cart-item__quantity">
+                <label for="quantity-{{ item.key }}">Quantity</label>
+                <input
+                  type="number"
+                  id="quantity-{{ item.key }}"
+                  name="updates[]"
+                  value="{{ item.quantity }}"
+                  min="0"
+                  class="cart-item__quantity-input"
+                >
+              </div>
+              <button type="button" class="cart-item__update" data-item-key="{{ item.key }}">Update</button>
+              <button type="button" class="cart-item__remove" data-item-key="{{ item.key }}">Remove</button>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="cart-footer">
+        <p class="cart-footer__subtotal">
+          Subtotal: <span class="cart-footer__subtotal-price">{{ cart.total_price | money }}</span>
+        </p>
+        <p class="cart-footer__note">Additional Notes:</p>
+        <textarea name="note" class="cart-footer__note-input">{{ cart.note }}</textarea>
+        <button type="submit" name="update" class="cart-footer__update">Update Cart</button>
+        <a href="/checkout" class="cart-footer__checkout">Checkout</a>
+      </div>
+    {% else %}
+      <p class="empty-cart-message">Your cart is empty.</p>
+      <a href="/" class="empty-cart-link">Continue Shopping</a>
+    {% endif %}
+  </div>
+</form>
+
+<script>
+  // JavaScript code for update and remove functionality
+  document.addEventListener('DOMContentLoaded', function() {
+    const updateButtons = document.querySelectorAll('.cart-item__update');
+    const removeButtons = document.querySelectorAll('.cart-item__remove');
+
+    // Attach event listeners to update buttons
+    updateButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const itemKey = button.getAttribute('data-item-key');
+        const quantityInput = document.getElementById('quantity-' + itemKey);
+        const quantity = quantityInput.value;
+        // Perform any additional logic or AJAX requests for updating the quantity
+        // You can use the 'itemKey' and 'quantity' values to update the cart item
+        console.log('Update item:', itemKey, 'with quantity:', quantity);
+      });
+    });
+
+    // Attach event listeners to remove buttons
+    removeButtons.forEach(function(button) {
+      button.addEventListener('click', function() {
+        const itemKey = button.getAttribute('data-item-key');
+        // Perform any additional logic or AJAX requests for removing the item from the cart
+        // You can use the 'itemKey' value to remove the cart item
+        console.log('Remove item:', itemKey);
+      });
+    });
+  });
+</script>

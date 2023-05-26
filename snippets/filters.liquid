@@ -1,0 +1,144 @@
+{%- liquid
+  assign sort_by = results.sort_by | default: results.default_sort_by
+  assign total_active_values = 0
+  if results.url
+    assign results_url = results.url
+  else
+    assign terms = results.terms | escape
+    assign results_url = '?q=' | append: terms | append: '&options%5Bprefix%5D=last&sort_by=' | append: sort_by
+  endif
+-%}
+<form id="filtersForm" class="filters__form">
+  {%- if results.terms -%}
+    <input type="hidden" name="q" value="{{ results.terms | escape }}">
+    <input name="options[prefix]" type="hidden" value="last">
+  {%- endif -%}
+  {% if results.current_vendor or results.current_type %}
+    <input type="hidden" name="q" value="{{ results.current_vendor }}{{ results.current_type }}">
+  {% endif %}
+  <input type="hidden" name="page" value="{{ paginate.current_page }}">
+  {%- if enable_sorting -%}
+    <div id="filtersWrapperDesktop" class="filter_wrapper">
+      {%- unless results.filters == empty -%}
+        <h3 class="filters__heading caption-large text-body">Sort By</h3>
+      {%- endunless -%}
+      {%- assign sort_by = results.sort_by | default: results.default_sort_by -%}
+      <select
+        name="sort_by"
+        class="facet-filters__sort select__select caption-large"
+        id="SortBy"
+        aria-describedby="a11y-refresh-page-message"
+      >
+        {%- for option in results.sort_options -%}
+          <option
+            value="{{ option.value | escape }}"
+            {% if option.value == sort_by %}
+              selected="selected"
+            {% endif %}
+          >
+            {{ option.name | escape }}
+          </option>
+        {%- endfor -%}
+      </select>
+    </div>
+  {%- endif -%}
+  {% if enable_filtering %}
+    {%- for filter in results.filters -%}
+      {%- assign total_active_values = total_active_values | plus: filter.active_values.size -%}
+      {% case filter.type %}
+        {% when 'list' %}
+          <div class="filter_wrapper">
+            <h3>{{ filter.label | escape }}</h3>
+            <ul class="filter_list">
+              {%- for value in filter.values -%}
+                <li class="list-menu__item filters__item">
+                  <input
+                    type="checkbox"
+                    name="{{ value.param_name }}"
+                    value="{{ value.value }}"
+                    id="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                    {% if value.active %}
+                      checked
+                    {% endif %}
+                    {% if value.count == 0 and value.active == false %}
+                      disabled
+                    {% endif %}
+                  >
+                  <label
+                    for="Filter-{{ filter.label | escape }}-{{ forloop.index }}"
+                    class="facet-checkbox{% if value.count == 0 and value.active == false %} facet-checkbox--disabled{% endif %}"
+                  >
+                    {{ value.label | escape }} ({{ value.count }})
+                  </label>
+                </li>
+              {%- endfor -%}
+            </ul>
+          </div>
+        {% when 'price_range' %}
+          {% liquid
+            assign currencies_using_comma_decimals = 'ANG,ARS,BRL,BYN,BYR,CLF,CLP,COP,CRC,CZK,DKK,EUR,HRK,HUF,IDR,ISK,MZN,NOK,PLN,RON,RUB,SEK,TRY,UYU,VES,VND' | split: ','
+            assign uses_comma_decimals = false
+            if currencies_using_comma_decimals contains cart.currency.iso_code
+              assign uses_comma_decimals = true
+            endif
+          %}
+          <div class="filter_wrapper">
+            <h3>{{ filter.label | escape }}</h3>
+            <div class="price_filter_range">
+              <div class="field">
+                <span class="field-currency">{{ cart.currency.symbol }}</span>
+                <input
+                  class="field__input"
+                  name="{{ filter.min_value.param_name }}"
+                  id="Filter-{{ filter.label | escape }}-GTE"
+                  {%- if filter.min_value.value -%}
+                    {%- if uses_comma_decimals -%}
+                      value="{{ filter.min_value.value | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+                    {%- else -%}
+                      value="{{ filter.min_value.value | money_without_currency | replace: ',', '' }}"
+                    {%- endif %}
+                  {%- endif -%}
+                  type="number"
+                  placeholder="0"
+                  min="0"
+                  {%- if uses_comma_decimals -%}
+                    max="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+                  {%- else -%}
+                    max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                  {% endif %}
+                >
+                <label class="field__label" for="Filter-{{ filter.label | escape }}-GTE"> From </label>
+              </div>
+
+              <div class="field">
+                <span class="field-currency">{{ cart.currency.symbol }}</span>
+                <input
+                  class="field__input"
+                  name="{{ filter.max_value.param_name }}"
+                  id="Filter-{{ filter.label | escape }}-LTE"
+                  {%- if filter.max_value.value -%}
+                    {%- if uses_comma_decimals -%}
+                      value="{{ filter.max_value.value | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+                    {%- else -%}
+                      value="{{ filter.max_value.value | money_without_currency | replace: ',', '' }}"
+                    {%- endif %}
+                  {%- endif -%}
+                  type="number"
+                  min="0"
+                  {%- if uses_comma_decimals -%}
+                    placeholder="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+                    max="{{ filter.range_max | money_without_currency | replace: '.', '' | replace: ',', '.' }}"
+                  {%- else -%}
+                    placeholder="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                    max="{{ filter.range_max | money_without_currency | replace: ',', '' }}"
+                  {% endif %}
+                >
+                <label class="field__label" for="Filter-{{ filter.label | escape }}-LTE"> to </label>
+              </div>
+            </div>
+            <button type="submit" class="button button--tertiary">Apply</button>
+          </div>
+      {% endcase %}
+    {%- endfor -%}
+  {% endif %}
+</form>

@@ -1,0 +1,57 @@
+<section id="mainCollectionHtml" class="prodSec">
+  {% paginate collection.products by 9 %}
+    <div class="container">
+      <div class="collection-page">
+        <div class="collection-container">
+          <div id="filters" class="filters">
+            <div class="drawer-trigger">Filters</div>
+            <div class="filter-content">
+              {% render 'filters',
+                results: collection,
+                enable_filtering: true,
+                enable_sorting: true,
+                paginate: paginate
+              %}
+            </div>
+          </div>
+          <div id="renderProducts" class="products">
+            <!-- Product Grid -->
+            {% if collection.products.size > 0 %}
+              {% for product in collection.products %}
+                {%- include 'product-card' -%}
+              {% endfor %}
+            {% else %}
+              <p>No items found in this collection.</p>
+            {% endif %}
+            <!-- Repeat product items as needed -->
+            {% if paginate.pages > 1 %}
+              <div class="pagination">
+                {% if paginate.next.is_link %}
+                  <a
+                    href="javascript:void(0)"
+                    data-page="{{ paginate.current_page | plus : 1 }}"
+                    id="loadMore"
+                    class="loadmore acBtn"
+                    >Load More</a
+                  >
+                {% endif %}
+              </div>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endpaginate %}
+</section>
+{% schema %}
+{
+  "name": "Collection Template",
+  "settings": []
+}
+{% endschema %}
+
+{% stylesheet %}
+{% endstylesheet %}
+
+{% javascript %}
+{% endjavascript %}

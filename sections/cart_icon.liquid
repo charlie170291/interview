@@ -1,0 +1,6 @@
+<a href="/cart" id="cart_icon" class="{% if cart.item_count > 0 %}has_items{% endif%} cart_icon">
+  <img src="{{ 'bag.svg' | asset_url }}" alt="">
+  <span>
+    {%- if cart.item_count > 0 -%}{{ cart.item_count }}{%- endif -%}
+  </span>
+</a>

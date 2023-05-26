@@ -1,0 +1,31 @@
+{%- assign current_variant = product.selected_or_first_available_variant -%}
+<div class="product-item">
+  <div class="product_banner">
+    <a href="{{ product.url | within: collection }}">
+      <img
+        src="{{ product.featured_image | img_url: '480x' }}"
+        alt="{{ product.title }}"
+      >
+    </a>
+  </div>
+  <h3>
+    <a class="product-title" href="{{ product.url | within: collection }}">{{ product.title }}</a>
+  </h3>
+  <div id="priceHtml" class="purchase">
+    {%- if current_variant.compare_at_price and current_variant.compare_at_price > current_variant.price -%}
+      <span class="specific-price-compare">{{ current_variant.compare_at_price | money }}</span>
+    {%- endif -%}
+    <span class="specific-price">{{ current_variant.price | money }}</span>
+  </div>
+  {%- if current_variant.available -%}
+    {%- assign form_id = 'product_form_list_' | append: current_variant.id -%}
+    {%- form 'product', product, id: form_id -%}
+      <input type="hidden" name="id" value="{{ current_variant.id }}">
+      <input type="hidden" name="quantity" value="1">
+      <button type="submit" class="add-to-cart acBtn">ADD TO CART</button>
+      <div class="errorMessage"></div>
+    {%- endform -%}
+  {%- else -%}
+    <a href="{{ product.url | within: collection }}" class="add-to-cart acBtn">VIEW MORE</a>
+  {%- endif -%}
+</div>

@@ -1,0 +1,26 @@
+{%- if section.settings.menu_items != blank -%}
+  <footer>
+    <div class="container">
+      <div class="footBot">
+        <div class="fbLeft">
+            {%- for item in linklists[section.settings.menu_items].links -%}
+              <a href="{{ item.url }}">{{ item.title }}</a>{% unless forloop.last %} / {% endunless %}
+            {%- endfor -%}
+        </div>
+      </div>
+    </div>
+  </footer>
+{%- endif -%}
+{%- schema -%}
+{
+  "name": "Footer",
+  "settings": [
+    {
+      "type": "link_list",
+      "label": "Menu Items",
+      "id": "menu_items",
+      "info": "Add menu items for the navigation menu"
+    }
+  ]
+}
+{%- endschema -%}
